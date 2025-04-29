@@ -11,6 +11,7 @@ namespace QLKhoHang.Data
         {
         }
 
+
         public DbSet<ProductModel> Products { get; set; }
         public DbSet<CategoryModel> Categories { get; set; }
     }

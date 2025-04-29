@@ -63,7 +63,7 @@ namespace QuanLyKhoHang.Controllers
                     Message = "Login successful",
                     UserName = user.UserName,
                     Email = user.Email
-                });
+                });                                   
             }
             else if (result.IsLockedOut)
             {
