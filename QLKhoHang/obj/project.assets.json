@@ -6088,11 +6088,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\ThucHanhKIenTruc\\QLKhoHang\\QLKhoHang.csproj",
+      "projectUniqueName": "E:\\ThucHanhKIenTruc\\QLKH\\QLKhoHang\\QLKhoHang.csproj",
       "projectName": "QLKhoHang",
-      "projectPath": "E:\\ThucHanhKIenTruc\\QLKhoHang\\QLKhoHang.csproj",
+      "projectPath": "E:\\ThucHanhKIenTruc\\QLKH\\QLKhoHang\\QLKhoHang.csproj",
       "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-      "outputPath": "E:\\ThucHanhKIenTruc\\QLKhoHang\\obj\\",
+      "outputPath": "E:\\ThucHanhKIenTruc\\QLKH\\QLKhoHang\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

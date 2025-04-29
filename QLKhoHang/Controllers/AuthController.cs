@@ -23,6 +23,7 @@ namespace QuanLyKhoHang.Controllers
             _configuration = configuration;
         }
 
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
