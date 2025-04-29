@@ -26,3 +26,9 @@ QLKhoHang/.vs/QLKhoHang/v17/.futdcache.v2
 *.v2
 frontend/package-lock.json
 frontend/package.json
+*.dll
+QLKhoHang/obj/Debug/net9.0/QLKhoHang.csproj.FileListAbsolute.txt
+*.cache
+*.exe
+*.db-wal
+QLKhoHang/.vs/QLKhoHang/copilot-chat/7a377971/sessions/faaff671-fa30-4278-8bac-564d0c0e4e6e
