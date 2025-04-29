@@ -24,3 +24,5 @@ QLKhoHang/.vs/QLKhoHang/v17/.futdcache.v2
 *.db-wal
 *.db-wal
 *.v2
+frontend/package-lock.json
+frontend/package.json
