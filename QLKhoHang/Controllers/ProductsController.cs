@@ -42,6 +42,8 @@ namespace QuanLyKhoHang.Controllers
             var product = new ProductModel
             {
                 Name = productmodel.Name,
+                CategoryId = productmodel.CategoryId,
+                Description = productmodel.Description,
                 Quantity = productmodel.Quantity
             };
 
