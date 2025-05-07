@@ -7,10 +7,8 @@
       </p>
 
       <div class="action-buttons">
-        <!-- Hiển thị nút dựa trên trạng thái đăng nhập -->
         <template v-if="!isLoggedIn">
           <router-link to="/login" class="login-btn">Đăng nhập</router-link>
-          <router-link to="/register" class="register-btn">Đăng ký</router-link>
         </template>
         <template v-else>
           <router-link to="/dashboard" class="dashboard-btn">

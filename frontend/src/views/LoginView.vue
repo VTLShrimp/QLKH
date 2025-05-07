@@ -76,11 +76,17 @@ export default defineComponent({
       this.errorMessage = "";
 
       try {
+        console.log("Đang gửi yêu cầu đăng nhập...");
         const result = await authApi.login(this.loginModel);
+        console.log("Phản hồi từ API:", result);
+
+        // Kiểm tra token
+        if (!result || !result.token) {
+          throw new Error("Token không hợp lệ từ phản hồi API");
+        }
 
         // Lưu token vào cả localStorage và Cookies
         localStorage.setItem("authToken", result.token);
-
         Cookies.set("authToken", result.token);
 
         // Lưu thông tin người dùng nếu có
@@ -94,17 +100,19 @@ export default defineComponent({
         console.log("Đăng nhập thành công", result);
 
         // Chuyển hướng sau khi đăng nhập thành công
-        this.router.push("/");
+        this.router.push("/").catch((err) => {
+          console.error("Lỗi chuyển hướng:", err);
+        });
       } catch (error: any) {
         console.error("Lỗi đăng nhập:", error);
 
         // Hiển thị thông báo lỗi chi tiết nếu có
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message
-        ) {
-          this.errorMessage = error.response.data.message;
+        if (error.response && error.response.data) {
+          console.log("Chi tiết lỗi từ API:", error.response.data);
+          this.errorMessage =
+            error.response.data.message || "Lỗi không xác định từ máy chủ";
+        } else if (error.message) {
+          this.errorMessage = error.message;
         } else {
           this.errorMessage =
             "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin!";
@@ -114,19 +122,36 @@ export default defineComponent({
       }
     },
 
-    // Kiểm tra xem người dùng đã đăng nhập chưa
-    checkAuth() {
+    // Kiểm tra xem người dùng đã đăng nhập chưa và token có hợp lệ không
+    async checkAuth() {
       const token =
         localStorage.getItem("authToken") || Cookies.get("authToken");
+
+      // Chỉ kiểm tra khi có token
       if (token) {
-        this.router.push("/"); // Đã đăng nhập thì chuyển về trang chủ
+        try {
+          // Kiểm tra token có hợp lệ không (tùy chọn)
+          // Nếu bạn có API để xác thực token, bạn có thể thêm ở đây
+          // await authApi.verifyToken(token);
+
+          console.log("Đã đăng nhập, chuyển hướng đến trang chủ");
+          this.router.push("/");
+        } catch (error) {
+          console.error("Token không hợp lệ:", error);
+          // Xóa token không hợp lệ
+          localStorage.removeItem("authToken");
+          Cookies.remove("authToken");
+        }
       }
     },
   },
 
-  mounted() {
+  created() {
     // Kiểm tra trạng thái đăng nhập khi component được tạo
-    this.checkAuth();
+    // Chỉ kiểm tra nếu không có force=true trong query params
+    if (!this.$route.query.force) {
+      this.checkAuth();
+    }
   },
 });
 </script>

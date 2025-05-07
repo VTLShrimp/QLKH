@@ -98,17 +98,9 @@ export default {
           this.errorMessage = "Vui lòng nhập đầy đủ thông tin sản phẩm";
           return;
         }
-
-        // Call API to create product
         await productApi.createProduct(this.productForm);
-
-        // Show success message
         this.successMessage = "Thêm sản phẩm thành công!";
-
-        // Reset form after successful submission
         this.resetForm();
-
-        // Redirect to product list after short delay
         setTimeout(() => {
           this.$router.push("/");
         }, 2000);

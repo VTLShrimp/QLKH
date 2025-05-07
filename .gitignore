@@ -48,3 +48,6 @@ QLKhoHang/.vs/QLKhoHang/v17/DocumentLayout.json
 *.db-shm
 *.db
 QLKhoHang/.vs/QLKhoHang/copilot-chat/7a377971/sessions/c27cd273-f9ac-4846-b33d-5eb5c13f6a9d
+*.db
+*.dll
+*.cache
