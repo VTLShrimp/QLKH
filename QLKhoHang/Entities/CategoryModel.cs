@@ -1,4 +1,4 @@
-﻿namespace QLKhoHang.Models
+﻿namespace QLKhoHang.Entities
 {
     public class CategoryModel
     {
