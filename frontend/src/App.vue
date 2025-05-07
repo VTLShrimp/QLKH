@@ -7,14 +7,6 @@ import { RouterView } from "vue-router";
       <RouterView />
     </div>
     <!-- Messenger Support Icon -->
-    <a
-      href="https://m.me/your-messenger-id"
-      target="_blank"
-      class="messenger-btn"
-      title="Chat hỗ trợ qua Messenger"
-    >
-      <i class="fab fa-facebook-messenger"></i>
-    </a>
   </div>
 </template>
 

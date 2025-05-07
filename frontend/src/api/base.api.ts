@@ -10,7 +10,7 @@ const apiClient = axios.create({
 });
 
 function getToken() {
-  return Cookies.get("token");
+  return Cookies.get("authToken");
 }
 
 export default {
@@ -27,6 +27,7 @@ export default {
 
   post: async (endpoint: string, body: any): Promise<AxiosResponse> => {
     const token = getToken();
+    console.log("Token being used:", token);
     return await apiClient.post(`${endpoint}`, body, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -68,31 +69,22 @@ export default {
   register: async (
     userName: string,
     password: string,
-    fullName: string,
-    email: string,
-    bankname: string,
-    banknumber: string
+    email: string
   ): Promise<AxiosResponse> => {
     return await apiClient.post("Authenticate/register", {
       userName,
       password,
-      fullName,
       email,
-      bankname,
-      banknumber,
     });
   },
   updateUser: async (
     token: string,
     userName: string,
-    fullName: string,
-    email: string,
-    bankname: string,
-    banknumber: string
+    email: string
   ): Promise<AxiosResponse> => {
     return await apiClient.put(
       "Authenticate/update-user",
-      { userName, fullName, email, bankname, banknumber },
+      { userName, email },
       { headers: { Authorization: `Bearer ${token}` } }
     );
   },

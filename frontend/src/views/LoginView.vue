@@ -1,46 +1,40 @@
 <template>
   <div class="login-container">
     <div class="login-form">
-      <h1 class="login-title">Đăng nhập</h1>
-
-      <div v-if="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </div>
-
+      <h1>Đăng nhập</h1>
       <div class="form-group">
         <label for="username">Tên đăng nhập</label>
         <input
           type="text"
           id="username"
-          v-model="loginForm.userName"
+          v-model="loginModel.userName"
           placeholder="Nhập tên đăng nhập"
-          @keyup.enter="login"
         />
       </div>
-
       <div class="form-group">
         <label for="password">Mật khẩu</label>
         <input
           type="password"
           id="password"
-          v-model="loginForm.password"
+          v-model="loginModel.password"
           placeholder="Nhập mật khẩu"
-          @keyup.enter="login"
+          @keyup.enter="handleLogin"
         />
       </div>
-
-      <div class="form-actions">
-        <button class="login-button" @click="login" :disabled="isLoading">
-          <span v-if="isLoading">Đang xử lý...</span>
-          <span v-else>Đăng nhập</span>
-        </button>
+      <div class="form-group checkbox-container">
+        <input type="checkbox" id="remember" v-model="loginModel.rememberMe" />
+        <label for="remember" class="checkbox-label">Ghi nhớ đăng nhập</label>
       </div>
-
-      <div class="form-footer">
+      <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
+      <button class="login-button" @click="handleLogin" :disabled="isLoading">
+        <span v-if="isLoading" class="loader"></span>
+        <span v-else>Đăng nhập</span>
+      </button>
+      <div class="bottom-links">
         <router-link to="/register" class="register-link"
-          >Chưa có tài khoản? Đăng ký ngay</router-link
+          >Đăng ký tài khoản mới</router-link
         >
-        <router-link to="/forgot-password" class="forgot-password-link"
+        <router-link to="/forgot-password" class="forgot-link"
           >Quên mật khẩu?</router-link
         >
       </div>
@@ -48,51 +42,93 @@
   </div>
 </template>
 
-<script>
-import authApi from "@/api/auth.api";
+<script lang="ts">
+import { defineComponent } from "vue";
+import authApi, { type LoginModel } from "@/api/auth.api";
+import { useRouter } from "vue-router";
+import Cookies from "js-cookie";
 
-export default {
+export default defineComponent({
   name: "LoginView",
+  setup() {
+    const router = useRouter();
+    return { router };
+  },
   data() {
     return {
-      loginForm: {
+      loginModel: {
         userName: "",
         password: "",
-      },
+        rememberMe: false,
+      } as LoginModel,
       isLoading: false,
       errorMessage: "",
     };
   },
   methods: {
-    async login() {
-      // Validate form
-      if (!this.loginForm.userName || !this.loginForm.password) {
-        this.errorMessage = "Vui lòng nhập đầy đủ thông tin đăng nhập";
+    async handleLogin() {
+      if (!this.loginModel.userName || !this.loginModel.password) {
+        this.errorMessage = "Vui lòng điền đầy đủ thông tin đăng nhập";
         return;
       }
 
+      this.isLoading = true;
+      this.errorMessage = "";
+
       try {
-        this.isLoading = true;
-        this.errorMessage = "";
+        const result = await authApi.login(this.loginModel);
 
-        const response = await authApi.login(this.loginForm);
+        // Lưu token vào cả localStorage và Cookies
+        localStorage.setItem("authToken", result.token);
 
-        // Lưu thông tin người dùng và token vào localStorage
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(response.user));
+        Cookies.set("authToken", result.token);
 
-        // Chuyển hướng đến trang dashboard hoặc trang chính
-        this.$router.push("/");
-      } catch (error) {
-        console.error("Login error:", error);
-        this.errorMessage =
-          error.message || "Đăng nhập không thành công. Vui lòng thử lại.";
+        // Lưu thông tin người dùng nếu có
+        if (result.userName) {
+          localStorage.setItem("userName", result.userName);
+        }
+        if (result.email) {
+          localStorage.setItem("userEmail", result.email);
+        }
+
+        console.log("Đăng nhập thành công", result);
+
+        // Chuyển hướng sau khi đăng nhập thành công
+        this.router.push("/");
+      } catch (error: any) {
+        console.error("Lỗi đăng nhập:", error);
+
+        // Hiển thị thông báo lỗi chi tiết nếu có
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          this.errorMessage = error.response.data.message;
+        } else {
+          this.errorMessage =
+            "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin!";
+        }
       } finally {
         this.isLoading = false;
       }
     },
+
+    // Kiểm tra xem người dùng đã đăng nhập chưa
+    checkAuth() {
+      const token =
+        localStorage.getItem("authToken") || Cookies.get("authToken");
+      if (token) {
+        this.router.push("/"); // Đã đăng nhập thì chuyển về trang chủ
+      }
+    },
   },
-};
+
+  mounted() {
+    // Kiểm tra trạng thái đăng nhập khi component được tạo
+    this.checkAuth();
+  },
+});
 </script>
 
 <style scoped>
@@ -102,102 +138,157 @@ export default {
   align-items: center;
   min-height: 100vh;
   background-color: #f5f5f5;
-  padding: 1rem;
+  background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 .login-form {
   width: 100%;
   max-width: 400px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-.login-title {
+h1 {
+  margin-bottom: 1.5rem;
   text-align: center;
   color: #333;
-  margin-bottom: 1.5rem;
-  font-size: 1.8rem;
-}
-
-.error-message {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 0.75rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
-.form-group label {
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.checkbox-container input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+.checkbox-label {
+  font-weight: normal;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #555;
   font-weight: 500;
+  color: #444;
 }
 
-.form-group input {
+input {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 1rem;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.form-group input:focus {
-  border-color: #4caf50;
+input:focus {
   outline: none;
-}
-
-.form-actions {
-  margin-top: 2rem;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
 .login-button {
+  position: relative;
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.85rem;
   background-color: #4caf50;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
+  margin-top: 0.5rem;
   transition: background-color 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .login-button:hover {
-  background-color: #45a049;
+  background-color: #3d9140;
 }
 
 .login-button:disabled {
-  background-color: #a5d6a7;
+  background-color: #cccccc;
   cursor: not-allowed;
 }
 
-.form-footer {
-  margin-top: 1.5rem;
+.error-message {
+  color: #f44336;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: rgba(244, 67, 54, 0.1);
+  border-radius: 4px;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
-.register-link,
-.forgot-password-link {
-  color: #4caf50;
-  text-decoration: none;
+.bottom-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
   font-size: 0.9rem;
 }
 
+.register-link,
+.forgot-link {
+  color: #4caf50;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
 .register-link:hover,
-.forgot-password-link:hover {
+.forgot-link:hover {
+  color: #3d9140;
   text-decoration: underline;
+}
+
+/* Loading spinner */
+.loader {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-form {
+    padding: 1.5rem;
+    max-width: 90%;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .bottom-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
 }
 </style>
