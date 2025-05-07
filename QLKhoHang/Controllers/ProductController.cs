@@ -9,7 +9,7 @@ namespace QLKhoHang.Controllers
         [HttpPost("add-product")]
         public async Task<ApiResult> Addproduct()
         {
-
+            
         }
     }
 }
